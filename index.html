@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#070d18">
+  <meta name="description" content="Dancing with SARS — interaktiver CLPS Lunar Mission Browser: Sonnenstand und Erd-Sichtbarkeit an Mond-Südpol-Landeplätzen vergleichen.">
+  <title>Dancing with SARS | CLPS Lunar Mission Browser</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <script defer src="assets/astro.js"></script>
+  <script defer src="assets/app.js"></script>
+</head>
+<body>
+<div class="app-shell">
+  <header class="topbar">
+    <div class="brand-mark" aria-hidden="true"><span>◈</span></div>
+    <div class="brand-heading">
+      <div class="eyebrow">LAGRANGE NEXUS <span class="separator">/</span> LUNAR SYSTEMS</div>
+      <h1>DANCING WITH <span>SARS</span></h1>
+    </div>
+    <div class="topbar-right">
+      <span class="edition">CLPS MISSION BROWSER <span>2026</span></span>
+      <span id="mode-pill" class="mode-pill demo"><span class="status-ping"></span> MODELL / DEMO</span>
+      <button id="help-button" class="outline-button" type="button" title="Methodik und Quellen">ⓘ <span>Mission Briefing</span></button>
+    </div>
+  </header>
+
+  <div class="workspace">
+    <aside class="sidebar" aria-label="Missionssteuerung">
+      <div class="side-head"><span class="panel-index">01 / MISSION CONTROL</span><span class="tiny-light">◉ STANDBY</span></div>
+      <section class="side-section">
+        <div class="section-heading"><h2>Mission Scenario</h2><span>CONFIG</span></div>
+        <label class="field-label" for="start-time">Startzeit · UTC</label>
+        <input id="start-time" type="datetime-local" step="3600" value="2026-11-14T00:00" aria-describedby="utc-hint">
+        <div id="utc-hint" class="helper-text">Alle Angaben und Zeitreihen in UTC.</div>
+        <label class="field-label field-spaced" for="duration">Analysezeitraum</label>
+        <select id="duration">
+          <option value="24">24 Stunden</option>
+          <option value="72">3 Tage</option>
+          <option value="168" selected>7 Tage</option>
+        </select>
+      </section>
+
+      <section class="side-section">
+        <div class="section-heading"><h2>Landing Sites</h2><span>MAX. 3</span></div>
+        <div id="site-choices" class="site-choices" aria-label="Landeplätze auswählen"></div>
+        <div class="helper-text">Demo-Koordinaten aus deinem ursprünglichen Projekt; keine bestätigten CLPS-Landeplätze.</div>
+      </section>
+
+      <section class="side-section">
+        <div class="section-heading"><h2>Ephemeris Source</h2><span>DATA</span></div>
+        <label class="field-label" for="source-select">Berechnungsquelle</label>
+        <select id="source-select"><option value="demo">Vereinfachtes Modell (offline)</option><option value="horizons" disabled>JPL Horizons (Datei fehlt)</option></select>
+        <label class="upload-button" for="ephemeris-upload"><span>↑</span> Horizons-JSON importieren</label>
+        <input id="ephemeris-upload" type="file" accept=".json,application/json" hidden>
+        <div id="data-message" class="helper-text" role="status">Keine verifizierten JPL-Ephemeriden geladen. Modus: didaktische Modellkurven.</div>
+      </section>
+
+      <section class="side-section bottom-tools">
+        <div class="section-heading"><h2>Export</h2><span>CSV</span></div>
+        <button id="csv-button" class="primary-button" type="button">↓ Aktuelle Zeitreihen exportieren</button>
+        <div class="helper-text">Export enthält Datenquelle und Qualitätskennzeichnung.</div>
+      </section>
+      <div class="side-foot">EARTH ↔ MOON <span>·</span> DESIGN PROTOTYPE <span>·</span> v3.0</div>
+    </aside>
+
+    <main class="content">
+      <div class="page-intro">
+        <div><span class="panel-index">02 / OPERATIONAL OVERVIEW</span><h2>South Pole <em>Mission Analysis</em></h2><p>Sonnenhöhe, Sichtverbindung zur Erde und gemeinsame Zeitfenster vergleichen.</p></div>
+        <div class="live-date"><span>SIMULATION EPOCH</span><strong id="epoch-display">14 NOV 2026 · 00:00 UTC</strong></div>
+      </div>
+
+      <div class="notice" id="source-notice"><span class="notice-icon">!</span><div><strong>SCHEMATISCHES MODELL</strong><span>Keine echten NASA-Werte. Zur wissenschaftlichen Analyse JPL-Horizons-Daten importieren. Der lokale Horizont ist idealisiert (0°); Geländeabschattung wird nicht berücksichtigt.</span></div></div>
+
+      <section aria-label="Vergleich der Standorte" class="comparison-section">
+        <div class="section-line"><h3>Landing Site Comparison</h3><span id="comparison-range">7-DAY WINDOW</span></div>
+        <div id="comparison-cards" class="comparison-cards"></div>
+      </section>
+
+      <section class="analytics-grid">
+        <div class="panel chart-panel">
+          <div class="panel-top"><div><span class="panel-index">03 / TIME SERIES</span><h3>Sun & Earth Elevation</h3><p id="chart-site-name">Shackleton Crater Rim</p></div><div class="legend"><span><i class="sun-dot"></i>Sonne</span><span><i class="earth-dot"></i>Erde</span></div></div>
+          <div id="chart-host" class="chart-host" aria-label="Zeitdiagramm der Horizonthöhe" role="img"></div>
+          <div class="scrubber-row"><span id="scrubber-start">START</span><label for="time-scrubber">ZEITPUNKT</label><span id="scrubber-end">ENDE</span></div>
+          <input id="time-scrubber" type="range" min="0" max="168" step="1" value="0" aria-label="Zeitposition auswählen">
+          <div class="instant-readout"><div><span>SONNE</span><strong id="sun-readout">–</strong></div><div><span>ERDE</span><strong id="earth-readout">–</strong></div><div><span>ZEITPUNKT</span><strong id="instant-time">–</strong></div></div>
+        </div>
+        <div class="panel lunar-map-panel">
+          <div class="panel-top"><div><span class="panel-index">04 / POSITION TRACKER</span><h3>Lunar South Pole</h3><p>Polare Übersicht · schematisch</p></div><span class="map-legend">● LANDING SITE</span></div>
+          <div id="polar-map" class="polar-map" aria-label="Schematische Karte der Landeplätze am Mondsüdpol"></div>
+          <div class="map-footer"><span>PROJEKTION: POLAR · NICHT MAẞSTÄBLICH</span><span>80°–90° S</span></div>
+        </div>
+      </section>
+
+      <section class="bottom-grid">
+        <div class="panel horizon-panel"><div class="panel-top"><div><span class="panel-index">05 / SKY VIEW</span><h3>Local Horizon</h3><p id="horizon-site-name">Sonne & Erde am gewählten Zeitpunkt</p></div><span class="map-legend">0° = GEOMETRISCHER HORIZONT</span></div><div id="sky-host" class="sky-host" role="img" aria-label="Sonne und Erde über oder unter lokalem Horizont"></div></div>
+        <div class="panel windows-panel"><div class="panel-top"><div><span class="panel-index">06 / CONTACT WINDOWS</span><h3>Earth Visibility Windows</h3><p>Stündliche Stichproben · ohne Terrain-Masken</p></div></div><div id="windows-host" class="windows-host"></div></div>
+      </section>
+
+      <footer class="content-foot"><span>DESIGNED FOR SPACE APPS 2026 <b>·</b> NOT AN OFFICIAL NASA PRODUCT</span><span>DATENQUELLEN & METHODIK IM BRIEFING</span></footer>
+    </main>
+  </div>
+</div>
+<dialog id="briefing-dialog" class="briefing-dialog" aria-labelledby="briefing-title">
+  <div class="dialog-header"><div><span class="panel-index">MISSION DOCUMENTATION</span><h2 id="briefing-title">Project Briefing</h2></div><button type="button" id="close-dialog" aria-label="Fenster schließen">✕</button></div>
+  <div class="dialog-body">
+    <h3>Ziel der Challenge</h3><p>Vergleiche potenzielle CLPS-Landeplätze und Zeitfenster anhand von Sonnen- und Erdhöhe über dem lokalen Horizont. Ein positiver Sonnenwinkel bedeutet in dieser Darstellung mögliche direkte Sonnenbeleuchtung; ein positiver Erdwinkel bedeutet geometrische Sicht zur Erde.</p>
+    <h3>Genauigkeit und Grenzen</h3><p><strong>Modell/Demo:</strong> Eine didaktische, nicht an reale Ephemeriden kalibrierte Näherung erzeugt anschauliche Kurven. Sie ist ausdrücklich keine NASA-Messung oder Flugplanungsgrundlage. <strong>JPL Horizons:</strong> Das mitgelieferte Python-Werkzeug kann NASA/JPL-Observer-Ephemeriden (Azimut und Elevation) für deine Demo-Orte abrufen. Es benötigt eine Internetverbindung und muss von dir lokal ausgeführt werden.</p>
+    <p><strong>In beiden Modi:</strong> Erhöhungen/Abschattungen durch topografische Hindernisse, lokale Mast-/Antennenwinkel, optische Eigenschaften, Landedynamik und echte Kommunikationserfolge werden nicht berechnet. Der Grenzwert ist ein idealisierter ebener Horizont von 0°. Prozente sind Anteile stündlicher Stichproben, keine exakten kontinuierlichen Betriebszeiten.</p>
+    <h3>Ursprünglicher SAR-Prototyp</h3><p>Die ursprünglichen Dateien liegen vollständig im Verzeichnis <code>original/</code>. Ihre Eis-Scores, CPR- und Gefahrenzonenwerte sind unvalidierte Beispielwerte und wurden bewusst nicht als wissenschaftliche Messergebnisse in den Hauptvergleich übernommen. Hoher CPR ist allein kein Beweis für Wassereis.</p>
+    <h3>Offizielle Quellen</h3><p><a href="https://www.spaceappschallenge.org/2026/" target="_blank" rel="noopener noreferrer">NASA Space Apps 2026</a> · <a href="https://ssd.jpl.nasa.gov/horizons/manual.html" target="_blank" rel="noopener noreferrer">JPL Horizons Manual</a> · <a href="https://ssd-api.jpl.nasa.gov/doc/horizons.html" target="_blank" rel="noopener noreferrer">JPL Horizons API</a></p>
+    <p>Die offiziellen Wettbewerbsregeln zum Beginn der Projektarbeit bitte vor einer Einreichung prüfen. Dieses Paket ist ein aus vorhandenem Prototyp entstandenes Vorbereitungs-/Demoprojekt.</p>
+  </div>
+</dialog>
+</body>
+</html>

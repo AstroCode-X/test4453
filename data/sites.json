@@ -1,0 +1,8 @@
+{
+  "catalog_status": "Demo coordinates transcribed from the supplied prototype; NOT official CLPS candidate landing sites or surveyed coordinates",
+  "sites": [
+    {"id":"shackleton","name":"Shackleton Crater Rim","lat":-89.9,"lon":0.0,"subtitle":"Kraterrand · Südpol","note":"Demonstrationskoordinate aus dem ursprünglichen Projekt; nicht für reale Landungsentscheidungen verwenden.","tag":"Polar"},
+    {"id":"cabeus","name":"Cabeus Crater Floor","lat":-84.9,"lon":-35.5,"subtitle":"Kältefalle · Südpol","note":"Demonstrationskoordinate aus dem ursprünglichen Projekt; keine verifizierte Landestelle.","tag":"PSR"},
+    {"id":"madrigal","name":"Madrigal Ridge (Demo)","lat":-88.7,"lon":-15.2,"subtitle":"Beispielkamm · Südpol","note":"Name und Koordinate aus dem ursprünglichen Prototyp; keine verifizierte NASA-Landestelle.","tag":"Demo"}
+  ]
+}
